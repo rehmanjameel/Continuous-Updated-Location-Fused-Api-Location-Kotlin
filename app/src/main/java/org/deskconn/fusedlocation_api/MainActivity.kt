@@ -2,6 +2,8 @@ package org.deskconn.fusedlocation_api
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationListener
 import android.location.LocationRequest
@@ -17,28 +19,37 @@ import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 
 class MainActivity : AppCompatActivity() {
 
+    var mLocationService: LocationService = LocationService()
+    lateinit var mServiceIntent: Intent
+    lateinit var mActivity: Activity
+
     private val LOCATION_PERMISSION_REQ_CODE = 1000
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var latitudeTextView: TextView
     private lateinit var longitudeTextView: TextView
     private lateinit var currentLocationButton: Button
+    private lateinit var serviceButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        mActivity = this
+
         latitudeTextView = findViewById(R.id.latitudeTextView)
         longitudeTextView = findViewById(R.id.longitudeTextView)
         currentLocationButton = findViewById(R.id.currentLocationButton)
+        serviceButton = findViewById(R.id.serviceButton)
 
             when{
                 PermissionUtils.checkAccessFineLocationGranted(this) -> {
                     when{
                         PermissionUtils.isLocationEnabled(this) -> {
-                            setUpLocationListener()
+                            setLocationListener()
+
                         }
                         else -> {
-                            PermissionUtils.showGPSNotEnabledDialogue(this)
+                            PermissionUtils.showGPSNotEnabledDialogue(mActivity)
                         }
                     }
                 }
@@ -50,10 +61,29 @@ class MainActivity : AppCompatActivity() {
 
         currentLocationButton.setOnClickListener {
             if (PermissionUtils.isLocationEnabled(this)){
-                setUpLocationListener()
+                setLocationListener()
             }
             else{
                 PermissionUtils.showGPSNotEnabledDialogue(this)
+            }
+        }
+
+        serviceButton.setOnClickListener {
+            mLocationService = LocationService()
+            mServiceIntent = Intent(this, mLocationService.javaClass)
+            if (!PermissionUtils.isMyServiceRunning(mLocationService.javaClass, mActivity)) {
+                startService(mServiceIntent)
+                Toast.makeText(
+                    mActivity,
+                    getString(R.string.service_start_successfully),
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                Toast.makeText(
+                    mActivity,
+                    getString(R.string.service_already_running),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -62,7 +92,7 @@ class MainActivity : AppCompatActivity() {
     /*val gfgLocationRequest = LocationRequest().setInterval(5000).setFastestInterval(5000)
         .setPriority(LocationRequest.QUALITY_HIGH_ACCURACY)*/
 
-    private fun setUpLocationListener(){
+    private fun setLocationListener(){
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         val locationRequest = LocationRequest().setInterval(500).setFastestInterval(100)
             .setPriority(LocationRequest.QUALITY_HIGH_ACCURACY)
@@ -99,6 +129,8 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -122,6 +154,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    //**** Service Code here ****//
+    override fun onDestroy() {
+        if (::mServiceIntent.isInitialized) {
+            stopService(mServiceIntent)
+        }
+        super.onDestroy()
     }
 
 }

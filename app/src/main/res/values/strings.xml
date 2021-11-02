@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">FusedLocation-Api</string>
+    <string name="service_already_running">Service is already running</string>
+    <string name="service_start_successfully">Service start successfully</string>
 </resources>

@@ -1,11 +1,14 @@
 package org.deskconn.fusedlocation_api
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.app.Activity
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.provider.Settings
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -25,6 +28,18 @@ object PermissionUtils {
         )
     }
 
+    fun isMyServiceRunning(serviceClass: Class<*>, mActivity: Activity): Boolean {
+        val manager: ActivityManager =
+            mActivity.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.getClassName()) {
+                Log.i("Service status", "Running")
+                return true
+            }
+        }
+        Log.i("Service status", "Not running")
+        return false
+    }
     //**** Granted the Access Fine Location Permission ****//
 
     fun checkAccessFineLocationGranted(context: Context): Boolean{
