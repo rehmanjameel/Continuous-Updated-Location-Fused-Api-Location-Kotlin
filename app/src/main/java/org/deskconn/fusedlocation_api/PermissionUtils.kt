@@ -32,7 +32,7 @@ object PermissionUtils {
         val manager: ActivityManager =
             mActivity.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.getClassName()) {
+            if (serviceClass.name == service.service.className) {
                 Log.i("Service status", "Running")
                 return true
             }

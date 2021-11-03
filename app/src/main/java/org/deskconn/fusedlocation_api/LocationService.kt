@@ -23,8 +23,6 @@ import java.util.*
 class LocationService(): Service() {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private lateinit var latitudeTextView: TextView
-    private lateinit var longitudeTextView: TextView
 
     var counter = 0
     var latitude: Double = 0.0
@@ -81,7 +79,7 @@ class LocationService(): Service() {
 
     private var timer: Timer? = null
     private var timerTask: TimerTask? = null
-    fun startTimer() {
+    private fun startTimer() {
         timer = Timer()
         timerTask = object : TimerTask() {
             override fun run() {
@@ -102,7 +100,7 @@ class LocationService(): Service() {
         ) //1 * 60 * 1000 1 minute
     }
 
-    fun stoptimertask() {
+    private fun stoptimertask() {
         if (timer != null) {
             timer!!.cancel()
             timer = null
